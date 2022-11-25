@@ -4,6 +4,11 @@ const db = require('../db/index')
 //导入
 const bcrypt = require('bcryptjs')
 
+//导入token
+const jwt = require('jsonwebtoken')
+//导入全局配置文件
+const config = require('../config')
+
 
 //注册新用户的处理函数
 exports.regUser = (req, res) => {
@@ -51,5 +56,33 @@ exports.regUser = (req, res) => {
 }
 
 exports.login = (req, res) => {
-    res.send('login OK')
+    //接受表单数据
+    const userinfo = req.body
+    //定义sql语句
+    const sql = `select * from ev_users where username=?`
+    //执行sql语句,查询
+    db.query(sql, userinfo.username, (err, results) => {
+        //执行失败
+        if(err) return res.cc(err)
+        //成功
+        if(results.length != 1) return res.cc('登录失败')
+        //TODO : 核对密码
+        const compareResult = bcrypt.compareSync(userinfo.password, results[0].password)
+        if(compareResult == false) {
+            return res.cc('登录失败')
+        }
+
+        //在服务器端生成字符串
+        const user = {...results[0], password: '', user_pic: ''}
+        //生成token
+        const tokenStr = jwt.sign(user, config.jwtSecretKey, { expiresIn: config.expiresIn})
+        //调用res.send将token响应给客户端
+        res.send({ 
+            status: 0,
+            message: '登录成功',
+            token: 'Bearer '+tokenStr,
+        })
+        
+    })
+    
 }

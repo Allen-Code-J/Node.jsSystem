@@ -23,14 +23,35 @@ app.use((req, res, next) => {
 })
 
 
+//一定要在路由之前配置token中间件
+const expressJWT = require('express-jwt')
+const config = require('./config')
+
+
+app.use(expressJWT({ secret: config.jwtSecretKey}).unless({ path: [/^\/api/]}))
+
+
+
+
 //导入使用路由模块
 const userRouter = require('./router/user')
 app.use('/api', userRouter)
+
+//导入并使用用户信息路由模块
+const userinfoRouter = require('./router/userinfo')
+app.use('/my', userinfoRouter)
+
+//导入并使用文章分类路由模块
+const artCateRouter = require('./router/artcate')
+app.use('/my/article', artCateRouter)
+
 
 //定义错误级别中间件
 app.use((err, req, res, next) => {
     //验证失败
     if(err instanceof joi.ValidationError) return res.cc(err)
+    //身份认证失败错误
+    if(err.name === 'UnauthorizedError') return res.cc('身份认证失败')
     //未知错误
     res.cc(err)
 })

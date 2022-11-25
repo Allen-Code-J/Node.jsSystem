@@ -14,7 +14,9 @@
     "@hapi/joi": "^17.1.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "express-jwt": "^5.3.3",
     "joi": "^17.7.0",
+    "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1"
   },
   "devDependencies": {
